@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortfolioPro Online — CSE portfolio intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <link rel="stylesheet" href="css/index.min.css">
+    <script src="js/tailwind-config.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-sectors.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+    <script src="js/portfolio-online.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container max-w-7xl" id="mainContent">
+
+            <!-- Dashboard Content (Initially Hidden) -->
+            <div id="dashboardContent" class="hidden">
+                <!-- Dashboard Header -->
+                <div id="portfolioViewHeader" class="mb-8">
+                    <div id="portfolioViewToolbar" class="hidden mb-3">
+                        <button type="button" id="backToPortfoliosBtn" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                            <i class="fas fa-arrow-left text-xs"></i>
+                            Back to portfolios
+                        </button>
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h1 id="dashboardTitle" class="text-3xl font-bold text-gray-900 truncate">Portfolio Dashboard</h1>
+                                <span id="portfolioAccountKeyBadge" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide"></span>
+                            </div>
+                            <p id="dashboardSubtitle" class="text-gray-600 mt-2">View and analyze your portfolio performance</p>
+                        </div>
+                        <div id="portfolioViewActions" class="hidden flex flex-wrap items-center gap-2 shrink-0">
+                            <a id="portfolioTargetsLink" href="target-management.html" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                <i class="fas fa-bullseye text-xs text-slate-400"></i>
+                                Targets
+                            </a>
+                            <a href="tradelog.html" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                <i class="fas fa-book text-xs text-slate-400"></i>
+                                Trade log
+                            </a>
+                            <button type="button" id="portfolioCompareBtn" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-chart-line text-xs"></i>
+                                Compare
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Portfolio Value</div>
+                        <div id="totalMarketValue" class="metric-value">Rs. 0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Cash Balance</div>
+                        <div id="cashBalanceDisplay" class="metric-value text-blue-600">Rs. 0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Cost</div>
+                        <div id="totalCost" class="metric-value">Rs. 0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total P&L</div>
+                        <div id="totalPnL" class="metric-value">Rs. 0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Return %</div>
+                        <div id="totalReturn" class="metric-value">0.00%</div>
+                    </div>
+                </div>
+
+                <!-- Trading activity for this snapshot (portfolio view only) -->
+                <div id="tradeExecutionSummary"></div>
+
+                <!-- Portfolios by Date and Key (if available) -->
+                <div id="groupedPortfoliosSection" class="hidden mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Portfolios by Date and Key</h3>
+                    <div id="groupedPortfoliosList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Grouped portfolios will be displayed here -->
+                    </div>
+                </div>
+
+                <!-- Comparison Summary Cards (Hidden by default) -->
+                <div id="comparisonCards" class="hidden mb-8">
+                    <!-- Portfolio Date Information -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 shadow-2xl border border-gray-200 mb-6">
+                        <h3 class="text-gray-600 text-sm font-medium mb-2">Portfolio Comparison Period</h3>
+                        <div class="flex justify-between items-center">
+                            <div class="text-center">
+                                <p class="text-gray-500 text-xs">Initial Portfolio</p>
+                                <p id="initialPortfolioDate" class="text-lg font-bold text-gray-900">-</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-gray-500 text-xs">Current Portfolio</p>
+                                <p id="currentPortfolioDate" class="text-lg font-bold text-gray-900">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comparison Metrics -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 shadow-2xl border border-blue-200">
+                            <h3 class="text-blue-600 text-sm font-medium">Portfolio Value Change</h3>
+                            <p id="valueChange" class="text-2xl font-bold text-blue-900">Rs. 0</p>
+                            <p id="valueChangePercent" class="text-sm text-blue-600">0.00%</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6 shadow-2xl border border-green-200">
+                            <h3 class="text-green-600 text-sm font-medium">P&L Change</h3>
+                            <p id="pnlChange" class="text-2xl font-bold text-green-900">Rs. 0</p>
+                            <p id="pnlChangePercent" class="text-sm text-green-600">0.00%</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl p-6 shadow-2xl border border-purple-200">
+                            <h3 class="text-purple-600 text-sm font-medium">Return % Change</h3>
+                            <p id="returnChange" class="text-2xl font-bold text-purple-900">0.00%</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-pink-50 to-pink-100 rounded-2xl p-6 shadow-2xl border border-pink-200">
+                            <h3 class="text-pink-600 text-sm font-medium">New Securities</h3>
+                            <p id="newSecurities" class="text-2xl font-bold text-pink-900">0</p>
+                            <p class="text-sm text-pink-600">Added today</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl p-6 shadow-2xl border border-orange-200">
+                            <h3 class="text-orange-600 text-sm font-medium">Removed Securities</h3>
+                            <p id="removedSecurities" class="text-2xl font-bold text-orange-900">0</p>
+                            <p class="text-sm text-orange-600">Sold today</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-2xl p-6 shadow-2xl border border-indigo-200">
+                            <h3 class="text-indigo-600 text-sm font-medium">Performance Rating</h3>
+                            <p id="performanceRating" class="text-2xl font-bold text-indigo-900">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div class="professional-card p-6 h-[26rem] relative">
+                        <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Portfolio Allocation (Top 10)</h3>
+                        <canvas id="allocationChart" class="max-h-full w-full"></canvas>
+                    </div>
+                    <div class="professional-card p-6 h-[26rem] relative">
+                        <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Performance by Security (Top 10)</h3>
+                        <canvas id="performanceChart" class="max-h-full w-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div class="professional-card p-6 h-[26rem] relative">
+                        <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Sector Market Value Totals</h3>
+                        <canvas id="sectorChart" class="max-h-full w-full"></canvas>
+                    </div>
+                    <div class="professional-card p-6 h-[26rem] relative">
+                        <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Performance by Sector</h3>
+                        <canvas id="sectorPerformanceChart" class="max-h-full w-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Portfolio Table -->
+                <div class="professional-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-center text-gray-700 text-xl font-semibold">Portfolio Details</h3>
+                        <div class="flex space-x-2">
+                            <button id="exportPortfolioTableBtn" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors">
+                                📊 Export
+                            </button>
+                            <button id="printPortfolioTableBtn" class="px-3 py-1 text-sm text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors">
+                                🖨️ Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="portfolioTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-center text-sm font-medium text-gray-900">
+                                        Rank
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                                        Symbol<br>
+                                        <span class="text-xs text-gray-600 font-normal">Avg. Cost</span>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-sm font-medium text-gray-900">
+                                        Quantity
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-sm font-medium text-gray-900">
+                                        Market Value<br>
+                                        <span class="text-xs text-gray-600 font-normal">Last Price</span>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-sm font-medium text-gray-900">
+                                        Gain/Loss<br>
+                                        <span class="text-xs text-gray-600 font-normal">Gain/Loss %</span>
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-sm font-medium text-gray-900">
+                                        Sector
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-sm font-medium text-gray-900">
+                                        Portfolio %
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="portfolioTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Portfolio data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Portfolio Data Modal -->
+            <div id="uploadModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Upload Portfolio Data</h2>
+                        <button id="closeUploadModal" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">
+                            ×
+                        </button>
+                    </div>
+                
+                <!-- Portfolio Details Section -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-3">Portfolio Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="portfolioDate" class="block text-sm font-medium text-blue-800 mb-1">Portfolio Date *</label>
+                            <input type="date" id="portfolioDate" required class="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-blue-600 mt-1">Portfolio name will be automatically generated as YYYYMMDD</p>
+                        </div>
+                        <div>
+                            <label for="portfolioDescription" class="block text-sm font-medium text-blue-800 mb-1">Description (Optional)</label>
+                            <input type="text" id="portfolioDescription" placeholder="e.g., End of month portfolio" class="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="cashBalance" class="block text-sm font-medium text-blue-800 mb-1">Cash Balance (Rs.) *</label>
+                            <input type="number" id="cashBalance" step="0.01" min="0" placeholder="0.00" required class="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-blue-600 mt-1">Enter your current cash balance</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Select Portfolio Files:</label>
+                        <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" multiple>
+                        <p class="text-sm text-gray-500 mt-1">Supports CSV, Excel (.xlsx, .xls) files</p>
+                    </div>
+                    
+                    <!-- Trade Execution Summary Section -->
+                    <div class="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                        <h3 class="text-lg font-semibold text-orange-900 mb-3">Trade Execution Summary (Optional)</h3>
+                        <div>
+                            <label for="tradeExecutionFile" class="block text-sm font-medium text-orange-800 mb-2">Select Trade Execution Summary File:</label>
+                            <input type="file" id="tradeExecutionFile" accept=".xlsx,.xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                            <p class="text-sm text-orange-600 mt-1">Upload your trade execution summary Excel file for accurate buy/sell tracking</p>
+                            <div class="mt-2 text-xs text-orange-700">
+                                <p><strong>Expected format:</strong> Security, Side (BUY/SELL), Avg Price, Executed Quantity, Gross Amount</p>
+                                <p><strong>Benefits:</strong> Accurate sold prices, precise P&L calculations, detailed trade journal</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button id="previewBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            🔍 Preview & Verify Dates
+                        </button>
+                        <button id="uploadBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors hidden">
+                            📤 Upload & Process Files
+                        </button>
+                        <button id="clearDataBtn" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors hidden">
+                            🗑️ Clear Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Date Verification Section (Hidden by default) -->
+                <div id="dateVerificationSection" class="hidden mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-yellow-900">Verify Portfolio Dates</h3>
+                            <p class="text-sm text-yellow-700">Please verify the extracted dates for each file. You can modify them if needed.</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <label class="text-sm text-yellow-800 font-medium">Sort by:</label>
+                            <select id="sortFilesSelect" class="px-3 py-1 border border-yellow-300 rounded-md text-sm bg-white">
+                                <option value="filename-asc">📄 Filename (A-Z)</option>
+                                <option value="filename-desc">📄 Filename (Z-A)</option>
+                                <option value="date-asc">📅 Date (Oldest First)</option>
+                                <option value="date-desc">📅 Date (Newest First)</option>
+                                <option value="source-asc">🔍 Source (A-Z)</option>
+                                <option value="source-desc">🔍 Source (Z-A)</option>
+                                <option value="original">🔄 Original Order</option>
+                            </select>
+                            <span id="sortStatus" class="text-xs text-yellow-600 font-medium"></span>
+                        </div>
+                    </div>
+                    <div id="dateVerificationList" class="space-y-3">
+                        <!-- Date verification items will be displayed here -->
+                    </div>
+                    <div class="flex space-x-4 mt-4">
+                        <button id="confirmDatesBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            ✅ Confirm & Upload
+                        </button>
+                        <button id="rejectDuplicatesBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            🗑️ Reject All Duplicates
+                        </button>
+                        <button id="cancelDatesBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Help Toggle Button -->
+                <div class="mt-6 text-center">
+                    <button id="helpToggle" class="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2 mx-auto transition-colors">
+                        <span id="helpIcon">📖</span>
+                        <span id="helpText">Show Help</span>
+                    </button>
+                </div>
+                
+                <!-- Collapsible Help Section -->
+                <div id="helpSection" class="hidden mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="text-blue-800 text-sm">
+                        <h4 class="font-semibold mb-3 text-blue-900">Portfolio Comparison Mode:</h4>
+                        <p class="mb-2"><strong>How to use comparison mode:</strong></p>
+                        <ol class="list-decimal list-inside ml-4 space-y-1 mb-4">
+                            <li>Set the portfolio date using the date picker</li>
+                            <li>First upload: Your initial portfolio (e.g., yesterday's data)</li>
+                            <li>Second upload: Your new portfolio (e.g., today's data)</li>
+                            <li>Dashboard will show comparison charts and change indicators</li>
+                            <li>Portfolios are automatically sorted by date for proper comparison order</li>
+                        </ol>
+                        
+                        <h4 class="font-semibold mb-2 text-blue-900">Multiple File Upload with Date Verification:</h4>
+                        <ul class="list-disc list-inside ml-4 space-y-1 mb-4">
+                            <li>Select multiple portfolio files using Ctrl+Click (or Cmd+Click on Mac)</li>
+                            <li>Click "Preview & Verify Dates" to see extracted dates for each file</li>
+                            <li>Use the "Sort by" dropdown to organize files for easy review</li>
+                            <li>Verify and modify dates as needed using the date picker</li>
+                            <li><strong>Portfolio Key:</strong> Enter a key (e.g., HDF, DSA, ARR) for each file</li>
+                            <li><strong>Auto Key Extraction:</strong> Keys are automatically extracted from A1 cell content (text between "(" and "/" characters)</li>
+                            <li><strong>Duplicate Detection:</strong> Files with same dates are highlighted in red</li>
+                            <li><strong>Individual Rejection:</strong> Click "❌ Reject" to exclude specific files</li>
+                            <li><strong>Bulk Rejection:</strong> Click "🗑️ Reject All Duplicates" to keep only first file per date</li>
+                            <li>Click "Confirm & Upload" to process accepted files with verified dates</li>
+                            <li><strong>Dual View:</strong> See both individual portfolios by key and combined portfolios by date</li>
+                            <li>Dashboard shows portfolios organized by date with individual keys and combined totals</li>
+                        </ul>
+                        
+                        <h4 class="font-semibold mb-2 text-blue-900">Expected File Format:</h4>
+                        <ul class="list-disc list-inside ml-4 space-y-1 mb-4">
+                            <li>Security - Stock symbol/ticker (e.g., ALUM.N0000)</li>
+                            <li>Quantity - Number of shares</li>
+                            <li>Avg Price - Average purchase price</li>
+                            <li>Total Cost - Total cost basis</li>
+                            <li>Market Value - Current market value</li>
+                            <li>Unrealized Gain / (Loss) - Unrealized profit/loss</li>
+                            <li>Unrealized Gain/Loss % - Return percentage</li>
+                        </ul>
+                        
+                        <h4 class="font-semibold mb-2 text-blue-900">Trade Execution Summary (Optional):</h4>
+                        <ul class="list-disc list-inside ml-4 space-y-1 mb-4">
+                            <li>Upload your broker's trade execution summary Excel file</li>
+                            <li>Provides accurate buy/sell prices and transaction details</li>
+                            <li>Enables precise P&L calculations with exact sold prices</li>
+                            <li>Creates detailed trading journal with individual transactions</li>
+                            <li>Expected columns: Security, Side (BUY/SELL), Avg Price, Executed Quantity, Gross Amount</li>
+                        </ul>
+                        
+                        <h4 class="font-semibold mb-2 text-blue-900">Supported Formats:</h4>
+                        <ul class="list-disc list-inside ml-4 space-y-1">
+                            <li>CSV files - Comma-separated values</li>
+                            <li>Excel files - .xlsx and .xls formats</li>
+                            <li>Multiple sheets - Excel files with multiple worksheets are supported</li>
+                        </ul>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Edit Portfolio Modal -->
+            <div id="editPortfolioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Edit Portfolio</h2>
+                        <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">
+                            ×
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="editPortfolioName" class="block text-sm font-medium text-gray-700 mb-1">Portfolio Name</label>
+                            <input type="text" id="editPortfolioName" readonly class="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
+                        </div>
+                        <div>
+                            <label for="editPortfolioDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <input type="text" id="editPortfolioDescription" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="editCashBalance" class="block text-sm font-medium text-gray-700 mb-1">Cash Balance (Rs.)</label>
+                            <input type="number" id="editCashBalance" step="0.01" min="0" placeholder="0.00" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3 mt-6">
+                        <button id="saveEditBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            Save Changes
+                        </button>
+                        <button id="cancelEditBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Management Section (Visible initially) -->
+            <div id="portfolioManagementSection" class="pp-card mb-8">
+                <div class="pp-card-header">
+                    <div>
+                        <h2 class="pp-card-title">Portfolios</h2>
+                        <p class="text-sm text-slate-500 mt-0.5">Manage snapshots · default view is combined (CMB)</p>
+                    </div>
+                    <div class="pp-quick-actions">
+                        <button id="newPortfolioBtn" type="button" class="pp-icon-action" title="New portfolio">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                        </button>
+                        <button id="exportBtn" type="button" class="pp-icon-action" title="Export selected or all" disabled>
+                            <i class="fas fa-download" aria-hidden="true"></i>
+                        </button>
+                        <div class="relative inline-block">
+                            <button id="importPortfolioBtn" type="button" class="pp-icon-action" title="Import JSON or ZIP">
+                                <i class="fas fa-upload" aria-hidden="true"></i>
+                            </button>
+                            <div id="importDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg z-50 border border-slate-200 py-1">
+                                <button id="importSingleBtn" type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-slate-50">
+                                    <i class="fas fa-file-import mr-2 text-slate-400"></i>Single JSON
+                                </button>
+                                <button id="importZipBtn" type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-slate-50">
+                                    <i class="fas fa-file-archive mr-2 text-slate-400"></i>ZIP bundle
+                                </button>
+                            </div>
+                        </div>
+                        <button id="backToUploadBtn" type="button" class="pp-icon-action hidden" title="Back to upload">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="portfolioListStats" class="pp-stat-grid mb-4 hidden"></div>
+
+                <div class="pp-toolbar-strip">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span id="portfolioCount" class="text-sm font-semibold text-slate-800">0 portfolios</span>
+                        <span class="text-xs text-slate-400" title="One row per unique date; multiple account files roll up to CMB">ⓘ</span>
+                    </div>
+                    <div class="pp-view-toggle" role="group" aria-label="Portfolio view">
+                        <button type="button" id="cardViewBtn" class="active" aria-pressed="true"><i class="fas fa-th-large mr-1"></i>Cards</button>
+                        <button type="button" id="tableViewBtn" aria-pressed="false"><i class="fas fa-table mr-1"></i>Table</button>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="selectAllPortfolios" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                        <span>Select all</span>
+                    </label>
+                    <span id="selectedCount" class="text-sm text-slate-500">0 selected</span>
+                    <button id="deleteSelectedBtn" type="button" class="pp-icon-action pp-icon-action-danger ml-auto" title="Delete selected" disabled>
+                        <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div id="comparisonControls" class="pp-selection-bar hidden" role="region" aria-label="Selection actions">
+                    <div class="pp-selection-bar-head">
+                        <p class="pp-selection-bar-title">Analyze selection</p>
+                        <p id="selectedPortfolios" class="pp-selection-bar-summary">—</p>
+                    </div>
+                    <div class="pp-action-bar" role="toolbar" aria-label="Portfolio actions">
+                        <button id="compareSelectedBtn" type="button" class="pp-action-btn pp-action-btn-primary" title="Compare exactly 2 snapshots" disabled>
+                            <span class="pp-action-btn-icon"><i class="fas fa-arrows-left-right" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Compare</span>
+                        </button>
+                        <button id="showChartViewBtn" type="button" class="pp-action-btn" title="Price trends across 2+ dates" disabled>
+                            <span class="pp-action-btn-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Trends</span>
+                        </button>
+                        <button id="showTradeAnalysisBtn" type="button" class="pp-action-btn pp-action-btn-accent" title="Open trading journal" disabled>
+                            <span class="pp-action-btn-icon"><i class="fas fa-book-open" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Journal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Portfolio List -->
+                <div id="portfolioList" class="space-y-4">
+                    <!-- Portfolios will be populated here -->
+                </div>
+
+                <!-- Table View Container (Hidden by default) -->
+                <div id="tableViewContainer" class="hidden">
+                    <div class="mb-4 flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <input type="search" id="portfolioListSearch" class="pp-input max-w-xs" placeholder="Search name or date…" autocomplete="off">
+                        <label class="text-sm font-medium text-gray-700">Account:</label>
+                        <select id="keyFilter" class="pp-select max-w-[140px] py-1 text-sm">
+                            <option value="CMB" selected>CMB (Combined only)</option>
+                            <option value="ALL">All (DSA/ARR/HDF/CMB)</option>
+                        </select>
+                        <label class="text-sm font-medium text-gray-700">Sort:</label>
+                        <select id="portfolioListSort" class="pp-select max-w-[220px] py-1 text-sm">
+                            <option value="date-desc" selected>Newest date first</option>
+                            <option value="date-asc">Oldest date first</option>
+                            <option value="value-desc">Highest value</option>
+                            <option value="return-desc">Highest return % (dep.)</option>
+                            <option value="return-asc">Lowest return % (dep.)</option>
+                            <option value="return-cost-desc">Highest return % (cost)</option>
+                            <option value="return-cost-asc">Lowest return % (cost)</option>
+                            <option value="profit-desc">Highest profit</option>
+                            <option value="deposits-cum-desc">Highest deposits (cum.)</option>
+                            <option value="cost-desc">Highest total cost</option>
+                            <option value="name-asc">Name A–Z</option>
+                        </select>
+                        <span id="filterStatus" class="text-xs text-slate-500 ml-auto"></span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table id="portfolioManagementTable" class="w-full bg-white border border-gray-200 rounded-lg">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="selectAllTable" class="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500">
+                                    </th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="name">Portfolio</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="key">Key</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider pp-sort-desc" data-sort="date">Date</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="securities">Securities</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="value">Total Value</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="cost" title="Sum of holdings cost basis">Total Cost</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="deposit-day" title="Net deposit on this date. Per account: CT→DSA, SL→ARR, FC→HDF. Combined = all.">Deposit (day)</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="deposits-cum" title="Cumulative net deposits through this date for the account (CT/SL/FC tags). Combined = full total.">Deposits (cum.)</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="cash">Cash</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="profit" title="Portfolio value minus cumulative net deposits">Profit</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="return" title="Return on cumulative deposits for this account">Return % (dep.)</th>
+                                    <th class="pp-sortable px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-sort="return-cost" title="(Value − total cost) / total cost">Return % (cost)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portfolioManagementTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Portfolio rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- No Portfolios Message -->
+                <div id="noPortfoliosMessage" class="pp-onboard hidden">
+                    <i class="fas fa-cloud-upload-alt pp-onboard-icon" aria-hidden="true"></i>
+                    <p class="text-lg font-semibold text-slate-800">Get started in one step</p>
+                    <p class="text-sm text-slate-500 mt-2 max-w-md mx-auto">Import a JSON backup from desktop PortfolioPro, or upload portfolios from the dashboard. All data stays in this browser.</p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3">
+                        <div class="pp-action-bar" role="toolbar" aria-label="Get started">
+                            <a href="settings.html" class="pp-action-btn pp-action-btn-accent" title="Import JSON backup">
+                                <span class="pp-action-btn-icon"><i class="fas fa-file-import" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">Import backup</span>
+                            </a>
+                            <button type="button" class="pp-action-btn" onclick="document.getElementById('importPortfolioBtn').click()" title="Import JSON or ZIP">
+                                <span class="pp-action-btn-icon"><i class="fas fa-upload" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">Import</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pp-onboard-steps">
+                        <div class="pp-onboard-step"><strong>1. Export</strong>Full JSON backup from desktop PortfolioPro Settings</div>
+                        <div class="pp-onboard-step"><strong>2. Import</strong>Settings → Import, or dashboard Import JSON/ZIP</div>
+                        <div class="pp-onboard-step"><strong>3. Analyze</strong>Compare, journal, targets, calculator</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Comparison Selection Section -->
+            <div id="portfolioComparisonSection" class="hidden professional-card mb-8 p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Portfolio Comparison</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Initial Portfolio (Baseline)</label>
+                        <select id="initialPortfolioSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select initial portfolio...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Portfolio (To Compare)</label>
+                        <select id="currentPortfolioSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select current portfolio...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button id="comparePortfoliosBtn" type="button" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                        🔍 Compare Portfolios
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trade Analysis Section -->
+            <!-- Portfolio Detail Section -->
+            <div id="portfolioDetailSection" class="hidden professional-card mb-8 p-6">
+                <!-- Portfolio detail content will be dynamically inserted here -->
+            </div>
+
+            <!-- Manual Trade Entry Modal -->
+            <!-- Hidden file input for portfolio import -->
+            <input type="file" id="portfolioImportFile" accept=".json" class="hidden">
+            <input type="file" id="zipImportFile" accept=".zip" class="hidden">
+
+        <!-- Dashboard Content (Initially Hidden) -->
+        <div id="dashboardContent" class="hidden">
+            <!-- Dashboard Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 id="dashboardTitle" class="text-3xl font-bold text-gray-900">Portfolio Dashboard</h1>
+                    <p class="text-gray-600 mt-2">View and analyze your portfolio performance</p>
+                </div>
+                <button id="backToPortfolioListBtn" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Portfolio List
+                </button>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                <div class="metric-card">
+                    <div class="metric-label">Total Portfolio Value</div>
+                    <div id="totalMarketValue" class="metric-value">Rs. 0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Cash Balance</div>
+                    <div id="cashBalanceDisplay" class="metric-value text-blue-600">Rs. 0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Cost</div>
+                    <div id="totalCost" class="metric-value">Rs. 0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total P&L</div>
+                    <div id="totalPnL" class="metric-value">Rs. 0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Return %</div>
+                    <div id="totalReturn" class="metric-value">0.00%</div>
+                </div>
+            </div>
+
+            <!-- Trade Execution Summary (if available) -->
+            <div id="tradeExecutionSummary"></div>
+
+            <!-- Portfolios by Date and Key (if available) -->
+            <div id="groupedPortfoliosSection" class="hidden mb-8">
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Portfolios by Date and Key</h3>
+                <div id="groupedPortfoliosList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Grouped portfolios will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Comparison Summary Cards (Hidden by default) -->
+            <div id="comparisonCards" class="hidden mb-8">
+                <!-- Portfolio Date Information -->
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 shadow-2xl border border-gray-200 mb-6">
+                    <h3 class="text-gray-600 text-sm font-medium mb-2">Portfolio Comparison Period</h3>
+                    <div class="flex justify-between items-center">
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs">Initial Portfolio</p>
+                            <p id="initialPortfolioDate" class="text-lg font-bold text-gray-900">-</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs">Current Portfolio</p>
+                            <p id="currentPortfolioDate" class="text-lg font-bold text-gray-900">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comparison Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 shadow-2xl border border-blue-200">
+                        <h3 class="text-blue-600 text-sm font-medium">Portfolio Value Change</h3>
+                        <p id="valueChange" class="text-2xl font-bold text-blue-900">Rs. 0</p>
+                        <p id="valueChangePercent" class="text-sm text-blue-600">0.00%</p>
+                    </div>
+                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6 shadow-2xl border border-green-200">
+                    <h3 class="text-green-600 text-sm font-medium">P&L Change</h3>
+                    <p id="pnlChange" class="text-2xl font-bold text-green-900">Rs. 0</p>
+                    <p id="pnlChangePercent" class="text-sm text-green-600">0.00%</p>
+                </div>
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl p-6 shadow-2xl border border-purple-200">
+                    <h3 class="text-purple-600 text-sm font-medium">New Securities</h3>
+                    <p id="newSecurities" class="text-2xl font-bold text-purple-900">0</p>
+                    <p class="text-sm text-purple-600">Added today</p>
+                </div>
+                <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl p-6 shadow-2xl border border-orange-200">
+                    <h3 class="text-orange-600 text-sm font-medium">Removed Securities</h3>
+                    <p id="removedSecurities" class="text-2xl font-bold text-orange-900">0</p>
+                    <p class="text-sm text-orange-600">Sold today</p>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="professional-card p-6 h-[26rem] relative">
+                    <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Portfolio Allocation (Top 10)</h3>
+                    <canvas id="allocationChart" class="max-h-full w-full"></canvas>
+                </div>
+                <div class="professional-card p-6 h-[26rem] relative">
+                    <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Performance by Security (Top 10)</h3>
+                    <canvas id="performanceChart" class="max-h-full w-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="professional-card p-6 h-[26rem] relative">
+                    <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Sector Market Value Totals</h3>
+                    <canvas id="sectorChart" class="max-h-full w-full"></canvas>
+                </div>
+                <div class="professional-card p-6 h-[26rem] relative">
+                    <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Performance by Sector</h3>
+                    <canvas id="sectorPerformanceChart" class="max-h-full w-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Diversification Chart -->
+            <div class="professional-card p-6 mb-8">
+                <h3 class="text-center text-gray-700 text-xl font-semibold mb-6">Portfolio Diversification</h3>
+                <div id="diversificationChart" class="chart-container" style="height: 600px;"></div>
+            </div>
+
+            <!-- Portfolio Table -->
+            <div class="professional-card mb-8 p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-center text-gray-700 text-xl font-semibold">Portfolio Details</h3>
+                    <div class="flex items-center space-x-3">
+                        <button id="exportPortfolioTableBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            📊 Export
+                        </button>
+                        <button id="printPortfolioTableBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            🖨️ Print
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto" style="max-width: 100%;">
+                    <table id="portfolioTableOld" class="w-full border-separate border-spacing-0" style="min-width: 800px;margin-left: 0px;">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-center text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Rank</div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 text-left text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Symbol</div>
+                                        <div class="text-xs text-gray-600">Avg. Cost</div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 text-right text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Quantity</div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 text-right text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Market Value</div>
+                                        <div class="text-xs text-gray-600">Last Price</div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 text-right text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Gain/Loss</div>
+                                        <div class="text-xs text-gray-600">Gain/Loss %</div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 text-center text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Sector</div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-2 text-center text-sm">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium">Portfolio %</div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolioTableBodyOld" style="margin-left: 0px;">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Comparison Table (Hidden by default) -->
+            <div id="comparisonTable" class="hidden professional-card mb-8 p-6" style="display: none; min-height: 400px !important; width: 100% !important;">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="text-center">
+                        <h3 class="text-gray-700 text-xl font-semibold">Portfolio Comparison - Changes Over Time</h3>
+                        <div class="flex justify-center items-center space-x-6 mt-3">
+                            <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                                <span class="text-xs text-blue-600 font-medium">INITIAL PORTFOLIO</span>
+                                <div id="comparisonInitialDate" class="text-lg font-bold text-blue-900">-</div>
+                            </div>
+                            <div class="text-gray-400 text-2xl">→</div>
+                            <div class="bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+                                <span class="text-xs text-green-600 font-medium">CURRENT PORTFOLIO</span>
+                                <div id="comparisonCurrentDate" class="text-lg font-bold text-green-900">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button id="exportComparisonTableBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            📊 Export
+                        </button>
+                        <button id="printComparisonTableBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            🖨️ Print
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto" style="width: 100%; min-height: 300px;">
+                    <table id="comparisonDataTable" class="w-full" style="width: 100%; min-height: 200px;">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-center">Security</th>
+                                <th class="px-4 py-2 text-center">Status</th>
+                                <th class="px-4 py-2 text-right">Quantity Change</th>
+                                <th class="px-4 py-2 text-right">Market Value Change</th>
+                                <th class="px-4 py-2 text-right">P&L Change</th>
+                                <th class="px-4 py-2 text-right">Return % Change</th>
+                                <th class="px-4 py-2 text-center">Sector</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody" style="display: table-row-group;">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- New Portfolio Comparison Table -->
+        <div id="newComparisonTable" class="hidden professional-card mb-8 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">📊 Portfolio Comparison</h2>
+                <div class="flex items-center space-x-3">
+                    <button id="exportNewComparisonBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        📊 Export
+                    </button>
+                    <button id="printNewComparisonBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        🖨️ Print
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 class="text-sm font-medium text-blue-800 mb-2">Portfolio Changes:</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div class="text-center">
+                        <div class="text-green-600 font-semibold">Added</div>
+                        <div id="addedCount" class="text-lg font-bold text-green-700">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-blue-600 font-semibold">Modified</div>
+                        <div id="modifiedCount" class="text-lg font-bold text-blue-700">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-red-600 font-semibold">Removed</div>
+                        <div id="removedCount" class="text-lg font-bold text-red-700">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-gray-600 font-semibold">Unchanged</div>
+                        <div id="unchangedCount" class="text-lg font-bold text-gray-700">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table id="newComparisonDataTable" class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Security</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-700 border-b">Status</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Initial Qty</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Current Qty</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Qty Change</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Initial Value</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Current Value</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Value Change</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Initial P&L</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Current P&L</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">P&L Change</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700 border-b">Return % Change</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-700 border-b">Sector</th>
+                        </tr>
+                    </thead>
+                    <tbody id="newComparisonTableBody">
+                        <tr>
+                            <td colspan="13" class="px-4 py-8 text-center text-gray-500">No comparison data available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Portfolio Diversification Chart - REMOVED (Now handled in separate pages) -->
+        </div>
+
+    <!-- Notification System -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <span id="notificationIcon" class="text-lg">ℹ️</span>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p id="notificationMessage" class="text-sm text-gray-900"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                    <button onclick="hideNotification()" class="text-gray-400 hover:text-gray-600">
+                        <span class="sr-only">Close</span>
+                        ×
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="js/index.min.js" defer></script>
+
+    <footer id="ppAppFooter"></footer>
+</body>
+</html>
+

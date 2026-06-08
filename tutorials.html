@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorials - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="pp-card overflow-hidden">
+                <div class="bg-indigo-600 px-5 py-4">
+                    <h2 class="text-base font-semibold text-white">1 · First import</h2>
+                    <p class="text-indigo-100 text-sm mt-0.5">~5 min</p>
+                </div>
+                <ol class="p-5 text-sm text-slate-600 space-y-2 list-decimal list-inside">
+                    <li>Export a full JSON backup from desktop PortfolioPro Settings.</li>
+                    <li>Open <a href="settings.html" class="text-indigo-600 hover:underline">Settings</a> here → <strong>Import</strong> → choose the file.</li>
+                    <li>Open the <a href="index.html" class="text-indigo-600 hover:underline">Dashboard</a> and confirm CMB rows appear.</li>
+                    <li>Export regularly to keep an off-browser backup.</li>
+                </ol>
+            </div>
+
+            <div class="pp-card overflow-hidden">
+                <div class="bg-emerald-600 px-5 py-4">
+                    <h2 class="text-base font-semibold text-white">2 · Deposits &amp; returns</h2>
+                    <p class="text-emerald-100 text-sm mt-0.5">~3 min</p>
+                </div>
+                <ol class="p-5 text-sm text-slate-600 space-y-2 list-decimal list-inside">
+                    <li>Open <a href="transactions.html" class="text-indigo-600 hover:underline">Transactions</a>.</li>
+                    <li>Add deposits with description <strong>CT</strong>, <strong>SL</strong>, or <strong>FC</strong>.</li>
+                    <li>Return to the dashboard — check <strong>Return % (dep.)</strong> columns.</li>
+                </ol>
+            </div>
+
+            <div class="pp-card overflow-hidden">
+                <div class="bg-violet-600 px-5 py-4">
+                    <h2 class="text-base font-semibold text-white">3 · Compare snapshots</h2>
+                    <p class="text-violet-100 text-sm mt-0.5">~4 min</p>
+                </div>
+                <ol class="p-5 text-sm text-slate-600 space-y-2 list-decimal list-inside">
+                    <li>Select two CMB dates on the dashboard.</li>
+                    <li>Click <strong>Compare</strong> in the selection bar.</li>
+                    <li>Review holdings diff, added/removed/modified counts.</li>
+                    <li>Or use <strong>More → Compare</strong> → Latest CMB pair.</li>
+                </ol>
+            </div>
+        </div>
+
+        <h2 class="text-lg font-semibold text-slate-900 mb-4">Step-by-step guides</h2>
+        <div class="pp-support-link-grid mb-8">
+            <a href="price-trends.html" class="pp-support-link-card">
+                <span class="pp-support-icon bg-blue-100 text-blue-600"><i class="fas fa-chart-area" aria-hidden="true"></i></span>
+                <h3>Price trends</h3>
+                <p>Select 2+ CMB dates under More → Price trends. Compare avg and last prices per symbol.</p>
+            </a>
+            <a href="trading-journal.html" class="pp-support-link-card">
+                <span class="pp-support-icon bg-orange-100 text-orange-600"><i class="fas fa-book-open" aria-hidden="true"></i></span>
+                <h3>Trading journal</h3>
+                <p>Pick CMB snapshots for FIFO realized P&amp;L, win rate, and export/print.</p>
+            </a>
+            <a href="target-management.html" class="pp-support-link-card">
+                <span class="pp-support-icon bg-purple-100 text-purple-600"><i class="fas fa-bullseye" aria-hidden="true"></i></span>
+                <h3>Target prices</h3>
+                <p>Choose a portfolio, pick an institute chip, edit targets per holding.</p>
+            </a>
+            <a href="calculator.html" class="pp-support-link-card">
+                <span class="pp-support-icon bg-green-100 text-green-600"><i class="fas fa-calculator" aria-hidden="true"></i></span>
+                <h3>Stock calculator</h3>
+                <p>Average-down and scenario calculations; saves linked to latest CMB.</p>
+            </a>
+            <a href="tradelog.html" class="pp-support-link-card">
+                <span class="pp-support-icon bg-teal-100 text-teal-600"><i class="fas fa-file-import" aria-hidden="true"></i></span>
+                <h3>Trade log upload</h3>
+                <p>One-off Excel trade summary — drag &amp; drop without syncing portfolios.</p>
+            </a>
+            <a href="docs.html#settings" class="pp-support-link-card">
+                <span class="pp-support-icon bg-slate-100 text-slate-600"><i class="fas fa-box-archive" aria-hidden="true"></i></span>
+                <h3>Backup &amp; restore</h3>
+                <p>Full JSON export from Settings before browser changes or imports.</p>
+            </a>
+        </div>
+
+        <div class="pp-card p-6">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Tips</h2>
+            <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+                <li>Use <strong>card vs table</strong> toggle and column sorting to scan snapshots quickly.</li>
+                <li>Hard-refresh (Cmd+Shift+R) after app updates if styles or scripts look stale.</li>
+                <li>Journal and trends require <strong>CMB</strong> — filter combined-only on the dashboard first.</li>
+                <li>Export JSON regularly from Settings — online mode has no Excel auto-sync.</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="js/pages/tutorials-page.min.js" defer></script>
+</body>
+</html>

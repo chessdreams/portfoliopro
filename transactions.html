@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash transactions - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <link rel="stylesheet" href="css/transactions.min.css">
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+    <div class="pp-container max-w-7xl" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print"></header>
+
+        <div class="pp-stat-grid mb-8">
+            <div class="pp-stat green"><div class="pp-stat-label">Total deposits</div><div class="pp-stat-value text-base" id="totalDeposits">Rs. 0</div></div>
+            <div class="pp-stat red"><div class="pp-stat-label">Withdrawals</div><div class="pp-stat-value text-base" id="totalWithdrawals">Rs. 0</div></div>
+            <div class="pp-stat blue"><div class="pp-stat-label">Net cash flow</div><div class="pp-stat-value text-base" id="netCashFlow">Rs. 0</div></div>
+            <div class="pp-stat purple"><div class="pp-stat-label">Transactions</div><div class="pp-stat-value text-base" id="totalTransactions">0</div></div>
+        </div>
+
+        <div class="pp-card mb-8">
+            <h2 class="pp-card-title mb-4">Add transaction</h2>
+                <form id="transactionForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label for="transactionDate" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                        <input type="date" id="transactionDate" class="pp-input" required>
+                    </div>
+                    
+                    <div>
+                        <label for="transactionAmount" class="block text-sm font-medium text-gray-700 mb-2">Amount (Rs.)</label>
+                        <input type="number" id="transactionAmount" step="0.01" min="0" class="pp-input" required>
+                    </div>
+                    
+                    <div>
+                        <label for="transactionType" class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                        <select id="transactionType" class="pp-select" required>
+                            <option value="deposit">Deposit</option>
+                            <option value="withdraw">Withdraw</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="transactionDescription" class="block text-sm font-medium text-gray-700 mb-2">Account tag</label>
+                        <input type="text" id="transactionDescription" placeholder="CT, SL, or FC" class="pp-input" required>
+                        <p class="text-xs text-gray-500 mt-1">Use CT, SL, or FC so deposits map to DSA, ARR, and HDF portfolios.</p>
+                    </div>
+                    
+                    <div class="md:col-span-2 lg:col-span-4 flex justify-end gap-2">
+                        <button type="button" onclick="clearForm()" class="pp-btn pp-btn-ghost">Clear</button>
+                        <button type="submit" class="pp-btn pp-btn-primary"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </form>
+        </div>
+
+        <div class="pp-card">
+            <div class="pp-card-header pp-no-print">
+                <h2 class="pp-card-title">History</h2>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <input type="search" id="searchInput" placeholder="Search…" class="pp-input max-w-xs py-1.5 text-sm">
+                    <button type="button" onclick="clearAllTransactions()" class="pp-icon-action pp-icon-action-danger" title="Clear all transactions">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="pp-table-wrap">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortTable(0)">
+                                Date <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortTable(1)">
+                                Type <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortTable(2)">
+                                Amount <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortTable(3)">
+                                Description <i class="fas fa-sort ml-1"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Transactions will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport()">
+
+    <script src="js/transactions.min.js" defer></script>
+
+    <footer id="ppAppFooter"></footer>
+</body>
+</html>

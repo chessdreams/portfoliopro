@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Calculator - Portfolio Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <link rel="stylesheet" href="css/calculator.min.css">
+    <script src="portfolio-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+    <div class="pp-container max-w-7xl" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            <!-- Main Calculator -->
+            <div class="xl:col-span-1">
+                <!-- Calculator Tabs -->
+                <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                    <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+                        <button id="buySellTab" onclick="switchTab('buySell')"
+                            class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm">
+                            <i class="fas fa-exchange-alt mr-2"></i>Buy/Sell Calculator
+                        </button>
+                        <button id="avgPriceTab" onclick="switchTab('avgPrice')"
+                            class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-calculator mr-2"></i>Average Price Calculator
+                        </button>
+                    </div>
+
+                    <!-- Buy/Sell Calculator Section -->
+                    <div id="buySellSection">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">Buy/Sell Calculator</h2>
+                                    <p class="text-gray-600">Calculate buy/sell returns with brokerage options</p>
+                                </div>
+                            </div>
+                            <button onclick="clearAll()"
+                                class="p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Reset all fields">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Stock Symbol -->
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Stock Symbol</label>
+                                <input type="text" id="stockSymbol" placeholder="e.g., JKH.N"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus text-sm"
+                                    autocomplete="off">
+                                <div id="symbolSuggestions"
+                                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden">
+                                    <!-- Suggestions will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity (Shares)</label>
+                                <input type="number" id="quantity" placeholder="0" min="0"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus text-sm">
+                            </div>
+
+                            <!-- Buy Price with Average Toggle -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Buy Price (Rs.)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="buyPrice" placeholder="0.00" step="0.25" min="0"
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus text-sm">
+                                    <div class="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3">
+                                        <span class="text-xs text-gray-700 mr-2">Avg</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="useAvgPrice" class="sr-only peer">
+                                            <div
+                                                class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600">
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sell Price -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Sell Price (Rs.)</label>
+                                <input type="number" id="sellPrice" placeholder="0.00" step="0.25" min="0"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Results Display -->
+                        <div id="calculationResults" class="mt-6 hidden">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div id="resultsContent" class="text-center">
+                                    <!-- Results will be displayed here -->
+                                </div>
+                                <div id="saveButtonContainer" class="mt-4 flex justify-center hidden">
+                                    <button onclick="saveToTable()"
+                                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                                        Save to Table
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brokerage Information -->
+                        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-sm text-blue-800 font-medium">Brokerage Information</span>
+                            </div>
+                            <p class="text-sm text-blue-700 mt-1" id="brokerageInfo">1.12% brokerage fee for buy and
+                                sell transactions</p>
+                        </div>
+                    </div>
+
+                    <!-- Average Price Calculator Section -->
+                    <div id="avgPriceSection" class="hidden">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">Average Price Calculator</h2>
+                                    <p class="text-gray-600">Calculate new average price when buying additional shares
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="clearAvgPriceAll()"
+                                class="p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Reset all fields">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Calculation Mode Toggle -->
+                        <div class="mb-6">
+                            <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                                <button id="avgPriceModeBtn" onclick="switchAvgPriceMode('calculate')"
+                                    class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-green-600 shadow-sm">
+                                    <i class="fas fa-calculator mr-2"></i>Calculate New Avg Price
+                                </button>
+                                <button id="quantityModeBtn" onclick="switchAvgPriceMode('quantity')"
+                                    class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900">
+                                    <i class="fas fa-shopping-cart mr-2"></i>Calculate Required Quantity
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Stock Symbol -->
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Stock Symbol</label>
+                                <input type="text" id="avgStockSymbol" placeholder="e.g., JKH.N"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent input-focus text-sm"
+                                    autocomplete="off">
+                                <div id="avgSymbolSuggestions"
+                                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden">
+                                    <!-- Suggestions will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Current Holdings -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">Current Holdings</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-2">Current
+                                            Quantity</label>
+                                        <input type="number" id="currentQuantity" placeholder="0" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent input-focus text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-2">Current Avg Price
+                                            </label>
+                                        <input type="number" id="currentAvgPrice" placeholder="0.00" step="0.01" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent input-focus text-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mode 1: Calculate New Average Price -->
+                            <div id="calculateMode" class="bg-green-50 rounded-lg p-4">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">New Purchase</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-2">New Quantity</label>
+                                        <input type="number" id="newQuantity" placeholder="0" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent input-focus text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-2">New Price
+                                            (Rs.)</label>
+                                        <input type="number" id="newPrice" placeholder="0.00" step="0.25" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent input-focus text-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mode 2: Calculate Required Quantity -->
+                            <div id="quantityMode" class="bg-blue-50 rounded-lg p-4 hidden">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">Target Parameters</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-2">Target Avg Price</label>
+                                        <input type="number" id="targetAvgPrice" placeholder="0.00" step="0.01" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600 mb-2">Buy Price (Rs.)</label>
+                                        <input type="number" id="currentMarketPrice" placeholder="0.00" step="0.25" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus text-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Average Price Results -->
+                        <div id="avgPriceResults" class="mt-6 hidden">
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <div id="avgPriceContent" class="text-center">
+                                    <!-- Results will be displayed here -->
+                                </div>
+                                <div id="avgPriceSaveButtonContainer" class="mt-4 flex justify-center hidden">
+                                    <button onclick="saveAvgPriceToTable()"
+                                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                                        Save to Table
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculation Information -->
+                        <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-sm text-green-800 font-medium">Calculation Methods</span>
+                            </div>
+                            <div class="text-sm text-green-700 mt-1 space-y-1">
+                                <p><strong>Mode 1:</strong> New Avg Price = (Current Qty × Current Price + New Qty × New Price + 1.12% Brokerage) ÷ Total Qty</p>
+                                <p><strong>Mode 2:</strong> Required Qty = (Current Qty × (Target Avg - Current Avg)) ÷ (Market Price + 1.12% Brokerage - Target Avg)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Calculations Sidebar -->
+            <div class="xl:col-span-3">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Saved Calculations</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="exportToJSON()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                                Export JSON
+                            </button>
+                            <button onclick="importFromJSON()"
+                                class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                                Import JSON
+                            </button>
+                            <button onclick="clearSavedCalculations()"
+                                class="text-red-600 hover:text-red-700 text-sm font-medium transition-colors">
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div id="summaryStats" class="mb-4 p-4 bg-gray-50 rounded-lg hidden">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="text-center">
+                                <div class="text-gray-600">Total P&L</div>
+                                <div id="totalPnL" class="text-lg font-semibold">Rs. 0.00</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-gray-600">Avg Return %</div>
+                                <div id="avgReturn" class="text-lg font-semibold">0.00%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="savedCalculationsTable" class="space-y-3">
+                        <div class="text-center text-gray-500 py-8">
+                            No saved calculations yet
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-db.min.js"></script>
+    <script src="js/calculator.min.js" defer></script>
+
+    <footer id="ppAppFooter"></footer>
+</body>
+</html>

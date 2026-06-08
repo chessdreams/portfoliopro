@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Price Management - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <link rel="stylesheet" href="css/target-management.min.css">
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-db.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+    <script src="target-prices-store.min.js"></script>
+    <script src="target-entity-picker.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="pp-card mb-6 pp-no-print">
+            <label for="targetPortfolioSelect" class="block text-sm font-medium text-slate-700 mb-2">Portfolio</label>
+            <select id="targetPortfolioSelect" class="pp-select w-full max-w-xl mb-4">
+                <option value="">Loading…</option>
+            </select>
+
+            <h2 class="text-sm font-semibold text-slate-800 mb-2">Institute targets</h2>
+            <p class="text-xs text-slate-500 mb-3">Select an institute chip to view and edit its targets for this portfolio.</p>
+            <div id="entityChipList" class="pp-entity-chips"></div>
+            <div class="pp-entity-add-row">
+                <input type="text" id="entityAddInput" class="pp-input" placeholder="New institute name…" autocomplete="off">
+                <button type="button" id="entityAddBtn" class="pp-btn pp-btn-secondary text-sm shrink-0">Add</button>
+            </div>
+            <p id="entityActiveLabel" class="pp-entity-active-label">Viewing: Default</p>
+        </div>
+
+        <div class="pp-card mb-8">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-4 pp-no-print">
+                <h2 class="text-lg font-semibold text-slate-900">Holdings</h2>
+                <div class="pp-action-bar pp-action-bar-compact" role="toolbar" aria-label="Export">
+                    <button type="button" id="exportTargetPriceBtn" class="pp-action-btn pp-action-btn-compact" title="Export CSV">
+                        <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                        <span class="pp-action-btn-label">Export</span>
+                    </button>
+                    <button type="button" id="printTargetPriceBtn" class="pp-action-btn pp-action-btn-compact" title="Print">
+                        <span class="pp-action-btn-icon"><i class="fas fa-print" aria-hidden="true"></i></span>
+                        <span class="pp-action-btn-label">Print</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg pp-no-print text-sm text-blue-800">
+                <ul class="space-y-1 list-disc list-inside">
+                    <li>Click column headers to sort</li>
+                    <li>Current and forecasted P&amp;L include 1.12% broker fees on the selling side</li>
+                    <li>Select an institute chip before editing — targets save only to that institute</li>
+                </ul>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table id="targetPriceTable" class="pp-data-table w-full" style="min-width: 1000px;">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="pp-sortable px-4 py-3 text-left text-sm font-medium text-gray-700 border-b pp-sort-asc" data-sort="stock">Stock</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="quantity">Quantity</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="avgCost">Avg Cost</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="currentPrice">Current Price</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="currentPnL">Current P&amp;L</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="currentPnLPercent">Current P&amp;L%</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="targetPrice">Target Price</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="targetPnL">Forecast P&amp;L</th>
+                            <th class="pp-sortable px-4 py-3 text-right text-sm font-medium text-gray-700 border-b" data-sort="targetPnLPercent">Forecast P&amp;L%</th>
+                            <th class="pp-sortable px-4 py-3 text-center text-sm font-medium text-gray-700 border-b" data-sort="tpSetDate">TP Set Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="targetPriceTableBody">
+                        <tr><td colspan="10" class="px-4 py-8 text-center text-gray-500">Select a portfolio</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Current P&amp;L</p>
+                        <p id="totalCurrentPnL" class="text-lg font-bold text-gray-900">Rs. 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Avg Current P&amp;L%</p>
+                        <p id="avgCurrentPnLPercent" class="text-lg font-bold text-gray-900">0.00%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Forecast P&amp;L</p>
+                        <p id="totalTargetPnL" class="text-lg font-bold text-gray-900">Rs. 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Avg Forecast P&amp;L%</p>
+                        <p id="avgTargetPnLPercent" class="text-lg font-bold text-gray-900">0.00%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Forecast uplift</p>
+                        <p id="forecastUplift" class="text-lg font-bold text-gray-900">Rs. 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Stocks with Targets</p>
+                        <p id="stocksWithTargets" class="text-lg font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="target-management.min.js"></script>
+</body>
+</html>

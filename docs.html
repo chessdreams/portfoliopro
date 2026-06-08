@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="pp-support-layout has-sidebar">
+            <aside class="pp-support-sidebar pp-no-print">
+                <div class="pp-card p-4">
+                    <h2 class="text-sm font-semibold text-slate-800 mb-3">On this page</h2>
+                    <nav class="pp-support-nav" aria-label="Documentation sections">
+                        <a href="#getting-started">Getting started</a>
+                        <a href="#import">Import &amp; backup</a>
+                        <a href="#dashboard">Dashboard</a>
+                        <a href="#more-tools">More menu tools</a>
+                        <a href="#targets">Targets</a>
+                        <a href="#transactions">Transactions</a>
+                        <a href="#settings">Settings &amp; backup</a>
+                        <a href="#troubleshooting">Troubleshooting</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="pp-card p-6 md:p-8 pp-support-prose">
+                <section id="getting-started">
+                    <h2>Getting started</h2>
+                    <p>PortfolioPro Online tracks Colombo Stock Exchange portfolios from JSON backups exported by the desktop app. Data stays in your browser (IndexedDB) — nothing is sent to a cloud server.</p>
+                    <h3>Quick setup</h3>
+                    <ol>
+                        <li>In desktop PortfolioPro, open <a href="settings.html" class="text-indigo-600 hover:underline">Settings</a> and export a full JSON backup.</li>
+                        <li>In this online app, open <a href="settings.html" class="text-indigo-600 hover:underline">Settings</a> → <strong>Import</strong> and choose that file.</li>
+                        <li>Open the <a href="index.html" class="text-indigo-600 hover:underline">Dashboard</a> — CMB (combined) snapshots should appear.</li>
+                        <li>Add deposits in <a href="transactions.html" class="text-indigo-600 hover:underline">Transactions</a> (use CT, SL, or FC tags) for return-on-deposits metrics.</li>
+                    </ol>
+                    <div class="pp-callout-inline info">
+                        Default dashboard view shows <strong>CMB (combined)</strong> only — one row per trade date with all accounts rolled up.
+                    </div>
+                </section>
+
+                <section id="import">
+                    <h2>Import &amp; backup</h2>
+                    <p>PortfolioPro Online does not read Excel folders from disk. Use JSON export/import to move data between browsers or from the desktop app.</p>
+                    <ul>
+                        <li>Export a full backup from Settings before clearing data or switching browsers.</li>
+                        <li>Import JSON restores portfolios, transactions, targets, and calculator saves.</li>
+                        <li>Dashboard Import accepts single JSON files or ZIP bundles.</li>
+                        <li>For broker Excel trade summaries, use <a href="tradelog.html" class="text-indigo-600 hover:underline">Trade log</a> upload (browser-only).</li>
+                    </ul>
+                    <p>For automatic sync from <strong>Portfolio*.xlsx</strong> files, use the desktop app in <code>portfoliopro/</code>, then export and import here.</p>
+                </section>
+
+                <section id="dashboard">
+                    <h2>Dashboard</h2>
+                    <p>The dashboard lists portfolio snapshots with card or table view, sorting, and multi-select.</p>
+                    <h3>Selection actions</h3>
+                    <ul>
+                        <li><strong>Compare</strong> — exactly 2 snapshots (same account key, e.g. CMB↔CMB).</li>
+                        <li><strong>Trends</strong> — 2+ CMB dates for price charts.</li>
+                        <li><strong>Journal</strong> — opens the FIFO trading journal for selected CMB dates.</li>
+                    </ul>
+                    <p>Open a single snapshot with <strong>View</strong> for holdings, sector charts, and scoped activity.</p>
+                </section>
+
+                <section id="more-tools">
+                    <h2>More menu tools</h2>
+                    <p>Find these under the header <strong>More ⋮</strong> menu:</p>
+                    <ul>
+                        <li><a href="portfolio-comparison.html" class="text-indigo-600 hover:underline">Compare</a> — side-by-side holdings diff between two dates.</li>
+                        <li><a href="price-trends.html" class="text-indigo-600 hover:underline">Price trends</a> — average and last price across CMB dates (pick 2+ portfolios).</li>
+                        <li><a href="trading-journal.html" class="text-indigo-600 hover:underline">Journal</a> — FIFO buy/sell reconstruction from synced data; sell P&amp;L includes 1.12% fees.</li>
+                        <li><a href="tradelog.html" class="text-indigo-600 hover:underline">Trade log</a> — standalone Excel upload for broker trade-summary files (no sync required).</li>
+                    </ul>
+                </section>
+
+                <section id="targets">
+                    <h2>Targets</h2>
+                    <p><a href="target-management.html" class="text-indigo-600 hover:underline">Target management</a> sets exit prices per holding in a chosen portfolio, with forecast P&amp;L (1.12% sell fee on proceeds).</p>
+                    <p><a href="targets.html" class="text-indigo-600 hover:underline">Symbol targets</a> is a quick ticker-level list shared with portfolio targets. Use institute chips on the management page for per-broker target sets.</p>
+                </section>
+
+                <section id="transactions">
+                    <h2>Transactions</h2>
+                    <p>Record net deposits and withdrawals. Description tags map to accounts:</p>
+                    <ul>
+                        <li><strong>CT</strong> → DSA</li>
+                        <li><strong>SL</strong> → ARR</li>
+                        <li><strong>FC</strong> → HDF</li>
+                    </ul>
+                    <p>Cumulative deposits drive <strong>Return % (dep.)</strong> on the dashboard and portfolio view.</p>
+                </section>
+
+                <section id="settings">
+                    <h2>Settings &amp; backup</h2>
+                    <ul>
+                        <li>Export full JSON backup or individual data sets (portfolios, transactions, targets, calculators).</li>
+                        <li>Import JSON to restore; destructive clear actions are available with confirmation.</li>
+                    </ul>
+                    <div class="pp-callout-inline warn">
+                        Export a full backup before importing or clearing data.
+                    </div>
+                </section>
+
+                <section id="troubleshooting">
+                    <h2>Troubleshooting</h2>
+                    <h3>Dashboard empty after import</h3>
+                    <p>Confirm the JSON file contains portfolio records. Try a full backup export from desktop PortfolioPro Settings, not a partial export.</p>
+                    <h3>Compare or trends disabled</h3>
+                    <p>Compare needs exactly 2 portfolios with the same key. Trends and journal require CMB snapshots — select 2+ combined dates.</p>
+                    <h3>Data missing after browser change</h3>
+                    <p>Data is per-browser. Export from Settings on the old browser and import on the new one.</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="js/pages/docs-page.min.js" defer></script>
+</body>
+</html>

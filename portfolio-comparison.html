@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Comparison - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+        <div class="flex justify-end mb-4 pp-no-print">
+            <button type="button" id="changeSelectionBtn" class="pp-icon-action hidden" title="Change selection">
+                <i class="fas fa-sliders" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div id="portfolioSelection" class="pp-card mb-6 pp-no-print">
+            <div class="pp-card-header">
+                <h2 class="pp-card-title">Select portfolios</h2>
+                <span id="portfolioCountBadge" class="text-sm text-slate-500"></span>
+            </div>
+            <div class="pp-toolbar mb-4">
+                <input type="search" id="portfolioSearch" class="pp-input max-w-md" placeholder="Filter portfolios by name or date…" autocomplete="off">
+                <div class="pp-quick-actions">
+                    <button type="button" id="swapPortfoliosBtn" class="pp-icon-action" title="Swap baseline and compare">
+                        <i class="fas fa-right-left" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" id="pickAdjacentBtn" class="pp-icon-action" title="Compare the two most recent COMBINED (CMB) portfolios">
+                        <i class="fas fa-forward" aria-hidden="true"></i>
+                        <span class="pp-icon-action-label">Latest CMB</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Baseline (earlier)</label>
+                    <select id="initialPortfolioSelect" class="pp-select"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Compare (later)</label>
+                    <select id="currentPortfolioSelect" class="pp-select"></select>
+                </div>
+            </div>
+            <div class="pp-action-bar pp-no-print" role="toolbar" aria-label="Compare">
+                <button type="button" id="compareBtn" class="pp-action-btn pp-action-btn-primary" disabled title="Compare portfolios">
+                    <span class="pp-action-btn-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
+                    <span class="pp-action-btn-label">Compare</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="comparisonResults" class="hidden">
+            <div id="portfolioSnapshots" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="pp-snapshot baseline">
+                    <p class="text-xs font-semibold uppercase text-slate-500 mb-1">Baseline</p>
+                    <p id="initialSnapshotName" class="font-bold text-slate-900">—</p>
+                    <p id="initialSnapshotMeta" class="text-sm text-slate-600 mt-1">—</p>
+                    <p id="initialSnapshotValue" class="text-lg font-semibold text-blue-700 mt-2">—</p>
+                </div>
+                <div class="pp-snapshot current">
+                    <p class="text-xs font-semibold uppercase text-slate-500 mb-1">Compare</p>
+                    <p id="currentSnapshotName" class="font-bold text-slate-900">—</p>
+                    <p id="currentSnapshotMeta" class="text-sm text-slate-600 mt-1">—</p>
+                    <p id="currentSnapshotValue" class="text-lg font-semibold text-emerald-700 mt-2">—</p>
+                </div>
+            </div>
+
+            <div id="comparisonSummary" class="pp-stat-grid mb-6">
+                <div class="pp-stat blue">
+                    <div class="pp-stat-label">Value change</div>
+                    <div id="valueChange" class="pp-stat-value text-blue-700">Rs. 0</div>
+                    <div id="valueChangePercent" class="pp-stat-sub text-blue-600">0.00%</div>
+                </div>
+                <div class="pp-stat green">
+                    <div class="pp-stat-label">P&amp;L change</div>
+                    <div id="pnlChange" class="pp-stat-value text-emerald-700">Rs. 0</div>
+                    <div id="pnlChangePercent" class="pp-stat-sub text-emerald-600">0.00%</div>
+                </div>
+                <div class="pp-stat purple">
+                    <div class="pp-stat-label">Added</div>
+                    <div id="newSecurities" class="pp-stat-value text-violet-700">0</div>
+                    <div class="pp-stat-sub text-violet-600">New positions</div>
+                </div>
+                <div class="pp-stat orange">
+                    <div class="pp-stat-label">Removed</div>
+                    <div id="removedSecurities" class="pp-stat-value text-amber-700">0</div>
+                    <div class="pp-stat-sub text-amber-600">Closed positions</div>
+                </div>
+                <div class="pp-stat red">
+                    <div class="pp-stat-label">Modified</div>
+                    <div id="modifiedSecurities" class="pp-stat-value text-red-700">0</div>
+                    <div class="pp-stat-sub text-red-600">Qty or value changed</div>
+                </div>
+            </div>
+
+            <div id="comparisonTableSection" class="pp-card mb-6">
+                <div class="pp-card-header">
+                    <h2 class="pp-card-title">Holdings diff</h2>
+                    <div class="pp-action-bar pp-action-bar-compact pp-no-print" role="toolbar" aria-label="Export">
+                        <button type="button" id="exportBtn" class="pp-action-btn pp-action-btn-primary pp-action-btn-compact" title="Export CSV">
+                            <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">CSV</span>
+                        </button>
+                        <button type="button" id="printBtn" class="pp-action-btn pp-action-btn-compact" title="Print">
+                            <span class="pp-action-btn-icon"><i class="fas fa-print" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Print</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-4 pp-no-print" id="statusFilters">
+                    <button type="button" class="pp-filter-pill active" data-status="all">All</button>
+                    <button type="button" class="pp-filter-pill" data-status="Added">Added</button>
+                    <button type="button" class="pp-filter-pill" data-status="Modified">Modified</button>
+                    <button type="button" class="pp-filter-pill" data-status="Removed">Removed</button>
+                    <button type="button" class="pp-filter-pill" data-status="Unchanged">Unchanged</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="comparisonTable" class="w-full display">
+                        <thead>
+                            <tr>
+                                <th>Security</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-right">Qty Δ</th>
+                                <th class="text-right">Value Δ</th>
+                                <th class="text-right">P&amp;L Δ</th>
+                                <th class="text-right">Return Δ</th>
+                                <th class="text-center">Sector</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody">
+                            <tr><td colspan="7" class="pp-empty">Select portfolios to compare</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="comparisonCharts" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="pp-card">
+                    <h3 class="font-semibold text-slate-800 mb-4">Top value movers</h3>
+                    <canvas id="valueChangeChart" height="280"></canvas>
+                </div>
+                <div class="pp-card">
+                    <h3 class="font-semibold text-slate-800 mb-4">Top P&amp;L movers</h3>
+                    <canvas id="pnlChangeChart" height="280"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="comparisonEmpty" class="pp-card pp-empty">
+            <i class="fas fa-arrows-left-right block"></i>
+            <p class="text-lg font-medium text-slate-700">No comparison yet</p>
+            <p class="text-sm mt-2">Compare portfolios with the <strong>same account key</strong> (DSA↔DSA, CMB↔CMB). Use <strong>Latest CMB pair</strong> for the last two combined snapshots.</p>
+        </div>
+    </div>
+
+    <script src="js/portfolio-comparison-page.min.js" defer></script>
+
+    <footer id="ppAppFooter"></footer>
+</body>
+</html>
+

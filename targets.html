@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol targets - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <link rel="stylesheet" href="css/targets.min.css">
+    <script src="target-prices-store.min.js"></script>
+    <script src="target-entity-picker.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container max-w-7xl" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div class="xl:col-span-1">
+                <div class="pp-card mb-4">
+                    <h2 class="text-sm font-semibold text-slate-800 mb-2">Institute</h2>
+                    <p class="text-xs text-slate-500 mb-3">Pick one institute at a time to view and save symbol targets.</p>
+                    <div id="entityChipList" class="pp-entity-chips"></div>
+                    <div class="pp-entity-add-row">
+                        <input type="text" id="entityAddInput" class="pp-input" placeholder="New institute name…" autocomplete="off">
+                        <button type="button" id="entityAddBtn" class="pp-btn pp-btn-secondary text-sm shrink-0">Add</button>
+                    </div>
+                    <div class="pp-entity-actions">
+                        <button type="button" id="entityClearBtn" class="pp-btn pp-btn-ghost text-xs">Clear institute targets</button>
+                    </div>
+                    <p id="entityActiveLabel" class="pp-entity-active-label">Viewing: Default</p>
+                </div>
+                <div class="pp-card">
+                    <div class="pp-card-header">
+                        <div>
+                            <h2 class="pp-card-title">Add target</h2>
+                            <p class="text-sm text-slate-500 mt-0.5">Quick entry by symbol</p>
+                        </div>
+                        <button type="button" onclick="clearAll()" class="pp-btn pp-btn-ghost text-sm py-2" title="Reset fields">
+                            <i class="fas fa-rotate-left"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="stockSymbol">Stock symbol</label>
+                            <input type="text" id="stockSymbol" placeholder="e.g. JKH.N" class="pp-input" autocomplete="off">
+                            <div id="symbolSuggestions" class="absolute z-10 w-full bg-white border border-slate-200 rounded-lg max-h-48 overflow-y-auto hidden"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="targetPrice">Target price (Rs.)</label>
+                            <input type="number" id="targetPrice" placeholder="0.00" step="0.01" min="0" class="pp-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2" for="targetDate">Target date</label>
+                            <input type="date" id="targetDate" class="pp-input">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="saveTargetPrice()" class="pp-btn pp-btn-primary w-full mt-6">
+                        <i class="fas fa-bullseye"></i> Save target
+                    </button>
+
+                    <p class="text-xs text-slate-500 mt-4 text-center">
+                        For per-holding targets with live P&amp;L, use
+                        <a href="target-management.html" class="text-indigo-600 font-medium hover:underline">portfolio targets</a>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="xl:col-span-3">
+                <div class="pp-card">
+                    <div class="pp-card-header">
+                        <h2 class="pp-card-title">Saved targets <span id="savedTargetsEntityHint" class="text-sm font-normal text-slate-500"></span></h2>
+                        <div class="pp-action-bar pp-action-bar-compact" role="toolbar" aria-label="Target actions">
+                            <button type="button" onclick="exportToJSON()" class="pp-action-btn pp-action-btn-compact" title="Export JSON">
+                                <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">Export</span>
+                            </button>
+                            <button type="button" onclick="importFromJSON()" class="pp-action-btn pp-action-btn-compact" title="Import JSON">
+                                <span class="pp-action-btn-icon"><i class="fas fa-upload" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">Import</span>
+                            </button>
+                            <button type="button" onclick="clearAllTargets()" class="pp-action-btn pp-action-btn-danger pp-action-btn-compact" title="Clear all targets">
+                                <span class="pp-action-btn-icon"><i class="fas fa-trash" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">Clear</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="targetPricesTable" class="space-y-2">
+                        <div class="pp-empty py-12">
+                            <i class="fas fa-bullseye block"></i>
+                            <p>No target prices saved yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/targets-page.min.js" defer></script>
+
+    <footer id="ppAppFooter"></footer>
+</body>
+</html>

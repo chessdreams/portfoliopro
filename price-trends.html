@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Trends - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-db.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+    <link rel="stylesheet" href="css/price-trends.min.css">
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="pp-card mb-6 pp-no-print">
+            <div class="pp-card-header">
+                <h2 class="pp-card-title">Portfolio selection</h2>
+                <button type="button" id="reloadTrendsBtn" class="pp-icon-action" title="Reload portfolios">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">Combined (CMB) snapshots only — select at least <strong>2</strong> trade dates (Ctrl/Cmd+click) to compare avg and last prices.</p>
+            <select id="trendsPortfolioSelect" class="pp-select w-full min-h-[120px]" multiple size="8" aria-label="Portfolios for price trends"></select>
+            <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap items-center gap-3 text-sm">
+                <span class="font-medium text-slate-700">Selected:</span>
+                <span id="selectedPortfoliosCount" class="font-semibold text-indigo-600">0 portfolios</span>
+                <span class="text-slate-300">|</span>
+                <span id="trendsDateRange" class="text-slate-600">—</span>
+            </div>
+            <p id="trendsHint" class="mt-3 text-sm text-amber-700 hidden">Select at least 2 portfolios to load the chart.</p>
+        </div>
+
+        <div id="priceTrendsChartSection" class="hidden pp-card mb-8">
+            <div class="pp-card-header mb-4">
+                <div>
+                    <h2 class="pp-card-title">Price trends</h2>
+                    <p id="chartViewSubtitle" class="text-sm text-slate-500 mt-0.5">Compare avg and last price across selected portfolio dates</p>
+                </div>
+            </div>
+            <div id="priceTrendsChartGrid" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="lg:col-span-1">
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <h4 class="text-sm font-semibold text-slate-700 mb-3">Stocks</h4>
+                        <input type="search" id="stockSearch" placeholder="Search…" class="pp-input text-sm mb-3">
+                        <div id="stockList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        <div class="flex gap-3 mt-3 pt-3 border-t border-slate-200 text-xs">
+                            <button type="button" id="selectAllStocks" class="text-indigo-600 hover:underline">Select all</button>
+                            <button type="button" id="clearAllStocks" class="text-slate-600 hover:underline">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-3">
+                    <div id="chartInfoMessage" class="hidden mb-3"></div>
+                    <div class="relative" style="height: 520px;">
+                        <canvas id="stockPriceChart"></canvas>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-200">
+                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                            <span class="font-medium">Chart type</span>
+                            <select id="chartViewType" class="pp-select max-w-[220px] py-1 text-sm">
+                                <option value="value">Value (avg + current)</option>
+                                <option value="percentage">% vs first date</option>
+                                <option value="pnl">P&amp;L (Rs.)</option>
+                                <option value="pnlPercentage">P&amp;L %</option>
+                            </select>
+                        </label>
+                        <div class="pp-action-bar pp-action-bar-compact" role="toolbar" aria-label="Chart actions">
+                            <button type="button" id="resetChart" class="pp-action-btn pp-action-btn-compact" title="Reset chart">
+                                <span class="pp-action-btn-icon"><i class="fas fa-rotate-left" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">Reset</span>
+                            </button>
+                            <button type="button" id="exportChart" class="pp-action-btn pp-action-btn-compact" title="Export PNG">
+                                <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                                <span class="pp-action-btn-label">PNG</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="price-trends.min.js" defer></script>
+</body>
+</html>

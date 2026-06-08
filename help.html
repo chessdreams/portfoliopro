@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="pp-card p-6 mb-6 pp-no-print">
+            <label for="helpSearch" class="block text-sm font-medium text-slate-700 mb-2">Search help</label>
+            <input type="search" id="helpSearch" class="pp-input max-w-xl" placeholder="Import, compare, journal, targets…" autocomplete="off">
+        </div>
+
+        <div class="pp-support-link-grid mb-8" id="helpCategories">
+            <a href="docs.html#getting-started" class="pp-support-link-card" data-keywords="start setup import backup json">
+                <span class="pp-support-icon bg-blue-100 text-blue-600"><i class="fas fa-rocket" aria-hidden="true"></i></span>
+                <h3>Getting started</h3>
+                <p>Import JSON backup, CMB snapshots, and dashboard basics.</p>
+            </a>
+            <a href="docs.html#import" class="pp-support-link-card" data-keywords="json backup export import restore">
+                <span class="pp-support-icon bg-teal-100 text-teal-600"><i class="fas fa-file-import" aria-hidden="true"></i></span>
+                <h3>Import &amp; backup</h3>
+                <p>JSON export/import and moving data between browsers.</p>
+            </a>
+            <a href="docs.html#more-tools" class="pp-support-link-card" data-keywords="compare trends journal tradelog fifo">
+                <span class="pp-support-icon bg-indigo-100 text-indigo-600"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
+                <h3>Analysis tools</h3>
+                <p>Compare, price trends, journal, and trade log.</p>
+            </a>
+            <a href="docs.html#targets" class="pp-support-link-card" data-keywords="target price bullseye institute">
+                <span class="pp-support-icon bg-violet-100 text-violet-600"><i class="fas fa-bullseye" aria-hidden="true"></i></span>
+                <h3>Targets</h3>
+                <p>Portfolio and symbol target prices.</p>
+            </a>
+            <a href="docs.html#transactions" class="pp-support-link-card" data-keywords="deposit ct sl fc withdrawal">
+                <span class="pp-support-icon bg-orange-100 text-orange-600"><i class="fas fa-exchange-alt" aria-hidden="true"></i></span>
+                <h3>Transactions</h3>
+                <p>Deposits, tags, and return on deposits.</p>
+            </a>
+            <a href="docs.html#settings" class="pp-support-link-card" data-keywords="backup export import json clear">
+                <span class="pp-support-icon bg-slate-100 text-slate-600"><i class="fas fa-cog" aria-hidden="true"></i></span>
+                <h3>Settings &amp; backup</h3>
+                <p>Export, import, and data management.</p>
+            </a>
+        </div>
+
+        <div class="pp-card p-6 md:p-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Frequently asked questions</h2>
+            <div id="faqList">
+                <div class="pp-faq-item" data-keywords="upload csv excel format">
+                    <button type="button" class="pp-faq-trigger" onclick="toggleFaq(this)">
+                        <span>How do I load portfolio data?</span>
+                        <i class="fas fa-chevron-down text-slate-400 text-sm transition-transform" aria-hidden="true"></i>
+                    </button>
+                    <div class="pp-faq-panel">
+                        Import a JSON backup from desktop PortfolioPro in <strong>Settings → Import</strong>, or use dashboard Import for JSON/ZIP files. The trade log page accepts a separate Excel trade-summary upload in the browser.
+                    </div>
+                </div>
+                <div class="pp-faq-item" data-keywords="cmb combined dsa arr hdf">
+                    <button type="button" class="pp-faq-trigger" onclick="toggleFaq(this)">
+                        <span>What is CMB vs DSA / ARR / HDF?</span>
+                        <i class="fas fa-chevron-down text-slate-400 text-sm transition-transform" aria-hidden="true"></i>
+                    </button>
+                    <div class="pp-faq-panel">
+                        Each Excel file maps to an account (DSA, ARR, HDF). Snapshots on the same date are also rolled into <strong>CMB (combined)</strong>. Compare, trends, and journal use CMB by default. Switch the table filter to “All” to see individual accounts.
+                    </div>
+                </div>
+                <div class="pp-faq-item" data-keywords="compare two portfolios selection">
+                    <button type="button" class="pp-faq-trigger" onclick="toggleFaq(this)">
+                        <span>How do I compare two portfolio dates?</span>
+                        <i class="fas fa-chevron-down text-slate-400 text-sm transition-transform" aria-hidden="true"></i>
+                    </button>
+                    <div class="pp-faq-panel">
+                        Select exactly two snapshots on the dashboard (checkboxes), then click <strong>Compare</strong>. Or open <strong>More → Compare</strong> and pick baseline vs compare dates. Keys must match (CMB↔CMB, etc.).
+                    </div>
+                </div>
+                <div class="pp-faq-item" data-keywords="journal fifo tradelog difference">
+                    <button type="button" class="pp-faq-trigger" onclick="toggleFaq(this)">
+                        <span>Journal vs Trade log — what is the difference?</span>
+                        <i class="fas fa-chevron-down text-slate-400 text-sm transition-transform" aria-hidden="true"></i>
+                    </button>
+                    <div class="pp-faq-panel">
+                        <strong>Journal</strong> (More menu) builds FIFO trades from imported portfolio snapshots — best for ongoing CMB analysis. <strong>Trade log</strong> is a one-off Excel upload for broker trade-summary files.
+                    </div>
+                </div>
+                <div class="pp-faq-item" data-keywords="private local indexeddb secure">
+                    <button type="button" class="pp-faq-trigger" onclick="toggleFaq(this)">
+                        <span>Is my data stored locally?</span>
+                        <i class="fas fa-chevron-down text-slate-400 text-sm transition-transform" aria-hidden="true"></i>
+                    </button>
+                    <div class="pp-faq-panel">
+                        Yes. Portfolios, transactions, and targets live in your browser’s IndexedDB. Nothing is uploaded to PortfolioPro cloud storage — this is a static site with no backend.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pp-card p-6 mt-6 text-center pp-no-print">
+            <h3 class="text-base font-semibold text-slate-900 mb-2">Still need help?</h3>
+            <p class="text-sm text-slate-600 mb-4">Read the full docs or send us a message.</p>
+            <div class="pp-action-bar justify-center">
+                <a href="contact.html" class="pp-action-btn pp-action-btn-primary">
+                    <span class="pp-action-btn-icon"><i class="fas fa-envelope" aria-hidden="true"></i></span>
+                    <span class="pp-action-btn-label">Contact</span>
+                </a>
+                <a href="docs.html" class="pp-action-btn">
+                    <span class="pp-action-btn-icon"><i class="fas fa-book" aria-hidden="true"></i></span>
+                    <span class="pp-action-btn-label">Docs</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="js/pages/help-page.min.js" defer></script>
+</body>
+</html>

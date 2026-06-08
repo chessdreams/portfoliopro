@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade log - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <link rel="stylesheet" href="css/tradelog.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="portfolio-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/tailwind-config.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div id="uploadPlaceholder" class="pp-card pp-onboard mb-8 pp-no-print"
+             onclick="document.getElementById('excelFile').click()"
+             ondrop="handleDrop(event)"
+             ondragover="handleDragOver(event)"
+             ondragenter="handleDragEnter(event)"
+             ondragleave="handleDragLeave(event)">
+            <input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden">
+            <i class="fas fa-file-excel pp-onboard-icon text-indigo-500" aria-hidden="true"></i>
+            <p class="text-lg font-semibold text-slate-800">Upload trading data</p>
+            <p class="text-sm text-slate-500 mt-2">Click or drag &amp; drop a broker Excel trade summary (.xlsx)</p>
+        </div>
+
+        <div id="tradeAnalysisSection" class="hidden">
+            <div id="tradingPerformanceSummary" class="hidden mb-6">
+                <div class="pp-stat-grid mb-4">
+                    <div class="pp-stat green"><div class="pp-stat-label">Total profit</div><div class="pp-stat-value text-base" id="totalProfit">Rs. 0</div></div>
+                    <div class="pp-stat" style="--pp-stat-accent:#dc2626"><div class="pp-stat-label">Total loss</div><div class="pp-stat-value text-base text-red-600" id="totalLoss">Rs. 0</div></div>
+                    <div class="pp-stat blue"><div class="pp-stat-label">Net P&amp;L</div><div class="pp-stat-value text-base" id="netPnL">Rs. 0</div></div>
+                    <div class="pp-stat purple"><div class="pp-stat-label">Win rate</div><div class="pp-stat-value text-base" id="winRate">0%</div></div>
+                </div>
+                <div class="pp-stat-grid mb-6">
+                    <div class="pp-stat"><div class="pp-stat-label">Total trades</div><div class="pp-stat-value" id="totalTrades">0</div></div>
+                    <div class="pp-stat orange"><div class="pp-stat-label">Avg per trade</div><div class="pp-stat-value text-base" id="avgProfitPerTrade">Rs. 0</div></div>
+                    <div class="pp-stat"><div class="pp-stat-label">Best trade</div><div class="pp-stat-value text-base" id="bestTrade">Rs. 0</div></div>
+                    <div class="pp-stat"><div class="pp-stat-label">Worst trade</div><div class="pp-stat-value text-base" id="worstTrade">Rs. 0</div></div>
+                </div>
+            </div>
+
+            <div id="tradingJournalContainer" class="pp-card mb-6">
+                <div class="pp-card-header mb-4 pp-no-print">
+                    <h2 class="pp-card-title">Daily trading journal</h2>
+                    <div class="pp-action-bar pp-action-bar-compact" role="toolbar" aria-label="Journal actions">
+                        <input type="search" id="tradelogJournalSearch" class="pp-input max-w-[180px] py-1 text-sm" placeholder="Search rows…" autocomplete="off" aria-label="Search journal rows">
+                        <button type="button" id="exportTradingJournalBtn" class="pp-action-btn pp-action-btn-compact" title="Export CSV">
+                            <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Export</span>
+                        </button>
+                        <button type="button" id="printTradingJournalBtn" class="pp-action-btn pp-action-btn-compact" title="Print">
+                            <span class="pp-action-btn-icon"><i class="fas fa-print" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Print</span>
+                        </button>
+                        <button type="button" id="clearDataBtn" class="pp-action-btn pp-action-btn-danger pp-action-btn-compact" title="Clear uploaded data">
+                            <span class="pp-action-btn-icon"><i class="fas fa-trash-alt" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="pp-table-wrap pp-dt-host overflow-x-auto">
+                    <table id="tradingJournalTable" class="pp-data-table w-full" style="min-width: 1000px;">
+                        <thead>
+                            <tr>
+                                <th class="pp-th pp-th-left">Date</th>
+                                <th class="pp-th pp-th-left">Stock</th>
+                                <th class="pp-th pp-th-right">Amount</th>
+                                <th class="pp-th pp-th-right">Ave price</th>
+                                <th class="pp-th pp-th-right">Market value</th>
+                                <th class="pp-th pp-th-center">Type</th>
+                                <th class="pp-th pp-th-left">Sold date</th>
+                                <th class="pp-th pp-th-right">Duration</th>
+                                <th class="pp-th pp-th-right">Sold price</th>
+                                <th class="pp-th pp-th-right">Sell order value</th>
+                                <th class="pp-th pp-th-right">P&amp;L</th>
+                                <th class="pp-th pp-th-right">P&amp;L%</th>
+                                <th class="pp-th pp-th-right">Annualized return</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradingJournalTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="portfolioHoldingsSummary" class="pp-card mb-6">
+                <div class="pp-card-header mb-4 pp-no-print">
+                    <h2 class="pp-card-title">Current holdings</h2>
+                    <div class="pp-action-bar pp-action-bar-compact" role="toolbar" aria-label="Holdings export">
+                        <input type="search" id="tradelogHoldingsSearch" class="pp-input max-w-[180px] py-1 text-sm" placeholder="Search holdings…" autocomplete="off" aria-label="Search holdings">
+                        <button type="button" id="exportHoldingsSummaryBtn" class="pp-action-btn pp-action-btn-compact" title="Export CSV">
+                            <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Export</span>
+                        </button>
+                        <button type="button" id="printHoldingsSummaryBtn" class="pp-action-btn pp-action-btn-compact" title="Print">
+                            <span class="pp-action-btn-icon"><i class="fas fa-print" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Print</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="pp-table-wrap pp-dt-host overflow-x-auto">
+                    <table id="holdingsSummaryTable" class="pp-data-table w-full" style="min-width: 1000px;">
+                        <thead>
+                            <tr>
+                                <th class="pp-th pp-th-left">Symbol</th>
+                                <th class="pp-th pp-th-right">Total qty</th>
+                                <th class="pp-th pp-th-right">Avg cost</th>
+                                <th class="pp-th pp-th-right">Current price</th>
+                                <th class="pp-th pp-th-right">Market value</th>
+                                <th class="pp-th pp-th-right">Unrealized P&amp;L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdingsSummaryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+    <script src="js/tradelog.min.js" defer></script>
+</body>
+</html>

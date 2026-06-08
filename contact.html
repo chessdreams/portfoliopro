@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="portfolio-ui.min.js"></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="pp-card p-6 md:p-8">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Send a message</h2>
+                <form id="contactForm" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-slate-700 mb-1">First name</label>
+                            <input type="text" id="firstName" name="firstName" required class="pp-input w-full">
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-slate-700 mb-1">Last name</label>
+                            <input type="text" id="lastName" name="lastName" required class="pp-input w-full">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                        <input type="email" id="email" name="email" required class="pp-input w-full">
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+                        <select id="subject" name="subject" required class="pp-select w-full">
+                            <option value="">Select a topic</option>
+                            <option value="sync">Excel sync</option>
+                            <option value="technical">Technical issue</option>
+                            <option value="bug">Bug report</option>
+                            <option value="feature">Feature idea</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-slate-700 mb-1">Message</label>
+                        <textarea id="message" name="message" rows="5" required class="pp-input w-full resize-y" placeholder="Include browser, steps to reproduce, and whether you imported from JSON…"></textarea>
+                    </div>
+                    <button type="submit" class="pp-btn pp-btn-primary w-full sm:w-auto">
+                        <i class="fas fa-paper-plane mr-2" aria-hidden="true"></i>Send message
+                    </button>
+                </form>
+            </div>
+
+            <div class="space-y-6">
+                <div class="pp-card p-6">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4">Get in touch</h2>
+                    <ul class="space-y-4 text-sm text-slate-600">
+                        <li class="flex gap-3">
+                            <span class="pp-support-icon bg-blue-100 text-blue-600 shrink-0"><i class="fas fa-envelope" aria-hidden="true"></i></span>
+                            <span>
+                                <strong class="text-slate-800 block">Email</strong>
+                                <a href="mailto:support@portfoliopro.com" class="text-indigo-600 hover:underline">support@portfoliopro.com</a>
+                            </span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="pp-support-icon bg-emerald-100 text-emerald-600 shrink-0"><i class="fas fa-clock" aria-hidden="true"></i></span>
+                            <span>
+                                <strong class="text-slate-800 block">Response time</strong>
+                                Usually within 24 hours on business days.
+                            </span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="pp-support-icon bg-violet-100 text-violet-600 shrink-0"><i class="fas fa-shield-alt" aria-hidden="true"></i></span>
+                            <span>
+                                <strong class="text-slate-800 block">Privacy</strong>
+                                Portfolio data stays local in your browser. Do not attach Excel files with account numbers unless necessary.
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="pp-card p-6">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-3">Before you write</h2>
+                    <nav class="flex flex-col gap-2">
+                        <a href="help.html" class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-sm font-medium text-slate-800">
+                            Help center &amp; FAQ
+                            <i class="fas fa-chevron-right text-slate-400 text-xs" aria-hidden="true"></i>
+                        </a>
+                        <a href="docs.html" class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-sm font-medium text-slate-800">
+                            Documentation
+                            <i class="fas fa-chevron-right text-slate-400 text-xs" aria-hidden="true"></i>
+                        </a>
+                        <a href="tutorials.html" class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-sm font-medium text-slate-800">
+                            Tutorials
+                            <i class="fas fa-chevron-right text-slate-400 text-xs" aria-hidden="true"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="js/pages/contact-page.min.js" defer></script>
+</body>
+</html>

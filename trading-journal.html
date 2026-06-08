@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Journal - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-db.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+    <link rel="stylesheet" href="css/trading-journal.min.css">
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div class="pp-card mb-6 pp-no-print">
+            <div class="pp-card-header">
+                <h2 class="pp-card-title">Portfolio selection</h2>
+                <button type="button" id="reloadJournalBtn" class="pp-icon-action" title="Reload portfolios">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">Combined (CMB) snapshots only — select one or more trade dates (Ctrl/Cmd+click). Chronological order is used for FIFO reconstruction.</p>
+            <select id="journalPortfolioSelect" class="pp-select w-full min-h-[120px]" multiple size="6" aria-label="Portfolios for journal"></select>
+            <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap items-center gap-3 text-sm">
+                <span class="font-medium text-slate-700">Selected:</span>
+                <span id="selectedPortfoliosCount" class="font-semibold text-orange-600">0 portfolios</span>
+                <span class="text-slate-300">|</span>
+                <span id="journalDateRange" class="text-slate-600">—</span>
+            </div>
+        </div>
+
+        <div id="tradingPerformanceSummary" class="hidden mb-6">
+            <div class="pp-stat-grid mb-4">
+                <div class="pp-stat green"><div class="pp-stat-label">Realized profit</div><div class="pp-stat-value text-base" id="totalProfit">Rs. 0</div></div>
+                <div class="pp-stat" style="--pp-stat-accent:#dc2626"><div class="pp-stat-label">Realized loss</div><div class="pp-stat-value text-base text-red-600" id="totalLoss">Rs. 0</div></div>
+                <div class="pp-stat blue"><div class="pp-stat-label">Net realized P&amp;L</div><div class="pp-stat-value text-base" id="netPnL">Rs. 0</div></div>
+                <div class="pp-stat purple"><div class="pp-stat-label">Win rate</div><div class="pp-stat-value text-base" id="winRate">0%</div></div>
+            </div>
+            <div class="pp-stat-grid">
+                <div class="pp-stat"><div class="pp-stat-label">Closed trades</div><div class="pp-stat-value" id="totalTrades">0</div></div>
+                <div class="pp-stat orange"><div class="pp-stat-label">Avg per trade</div><div class="pp-stat-value text-base" id="avgProfitPerTrade">Rs. 0</div></div>
+                <div class="pp-stat"><div class="pp-stat-label">Best trade</div><div class="pp-stat-value text-base" id="bestTrade">Rs. 0</div></div>
+                <div class="pp-stat"><div class="pp-stat-label">Worst trade</div><div class="pp-stat-value text-base" id="worstTrade">Rs. 0</div></div>
+            </div>
+        </div>
+
+        <div id="tradingJournalContainer" class="hidden pp-card mb-6">
+            <div class="pp-card-header mb-4">
+                <h2 class="pp-card-title">Trading journal</h2>
+                <div class="flex flex-wrap items-center gap-3 pp-no-print">
+                    <input type="search" id="journalSearchInput" class="pp-input max-w-[160px] py-1 text-sm" placeholder="Search symbol…" autocomplete="off">
+                    <select id="journalTypeFilter" class="pp-select py-1 text-sm max-w-[120px]">
+                        <option value="ALL">All types</option>
+                        <option value="BUY">BUY only</option>
+                        <option value="SELL">SELL only</option>
+                    </select>
+                    <div class="pp-action-bar pp-action-bar-compact" role="toolbar" aria-label="Journal actions">
+                        <button type="button" id="exportTradingJournalBtn" class="pp-action-btn pp-action-btn-compact" title="Export CSV">
+                            <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Export</span>
+                        </button>
+                        <button type="button" id="printTradingJournalBtn" class="pp-action-btn pp-action-btn-compact" title="Print">
+                            <span class="pp-action-btn-icon"><i class="fas fa-print" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Print</span>
+                        </button>
+                        <button type="button" id="addManualTradeBtn" class="pp-action-btn pp-action-btn-accent pp-action-btn-compact" title="Add manual trade">
+                            <span class="pp-action-btn-icon"><i class="fas fa-plus" aria-hidden="true"></i></span>
+                            <span class="pp-action-btn-label">Add trade</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="pp-table-wrap pp-dt-host">
+                <table id="tradingJournalTable" class="pp-data-table">
+                    <thead>
+                        <tr>
+                            <th class="pp-th pp-th-left">Date</th>
+                            <th class="pp-th pp-th-left">Stock</th>
+                            <th class="pp-th pp-th-right">Qty</th>
+                            <th class="pp-th pp-th-right">Avg price</th>
+                            <th class="pp-th pp-th-right">Value</th>
+                            <th class="pp-th pp-th-center">Type</th>
+                            <th class="pp-th pp-th-left">Sold date</th>
+                            <th class="pp-th pp-th-right">Days</th>
+                            <th class="pp-th pp-th-right" title="Average execution price per share (Rs.)">Sell price (Rs./sh)</th>
+                            <th class="pp-th pp-th-right" title="Gross proceeds: quantity × sell price">Sell proceeds (Rs.)</th>
+                            <th class="pp-th pp-th-right">P&amp;L</th>
+                            <th class="pp-th pp-th-right">P&amp;L%</th>
+                            <th class="pp-th pp-th-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradingJournalTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="portfolioHoldingsSummary" class="hidden pp-card mb-6">
+            <div class="pp-card-header mb-4">
+                <div>
+                    <h2 class="pp-card-title">Latest holdings</h2>
+                    <p id="holdingsSummarySubtitle" class="text-xs text-slate-500 mt-0.5"></p>
+                </div>
+                <div class="pp-action-bar pp-action-bar-compact pp-no-print" role="toolbar" aria-label="Holdings export">
+                    <button type="button" id="exportHoldingsSummaryBtn" class="pp-action-btn pp-action-btn-compact" title="Export CSV">
+                        <span class="pp-action-btn-icon"><i class="fas fa-download" aria-hidden="true"></i></span>
+                        <span class="pp-action-btn-label">Export</span>
+                    </button>
+                    <button type="button" id="printHoldingsSummaryBtn" class="pp-action-btn pp-action-btn-compact" title="Print">
+                        <span class="pp-action-btn-icon"><i class="fas fa-print" aria-hidden="true"></i></span>
+                        <span class="pp-action-btn-label">Print</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pp-table-wrap pp-dt-host">
+                <table id="holdingsSummaryTable" class="pp-data-table">
+                    <thead>
+                        <tr>
+                            <th class="pp-th pp-th-left">Symbol</th>
+                            <th class="pp-th pp-th-right">Qty</th>
+                            <th class="pp-th pp-th-right">Avg cost</th>
+                            <th class="pp-th pp-th-right">Price</th>
+                            <th class="pp-th pp-th-right">Market value</th>
+                            <th class="pp-th pp-th-right">Unrealized P&amp;L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdingsSummaryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div id="manualTradeModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 pp-no-print">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 shadow-xl">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Add manual trade</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trade date</label>
+                    <input type="date" id="tradeDate" class="pp-input w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock symbol</label>
+                    <input type="text" id="stockSymbol" class="pp-input w-full" placeholder="e.g. COMB.N0000">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" id="tradeQuantity" class="pp-input w-full" step="0.01" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Average price</label>
+                    <input type="number" id="tradePrice" class="pp-input w-full" step="0.01" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stop loss</label>
+                    <input type="number" id="stopLoss" class="pp-input w-full" step="0.01" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Take profit</label>
+                    <input type="number" id="takeProfit" class="pp-input w-full" step="0.01" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trade type</label>
+                    <select id="tradeType" class="pp-select w-full">
+                        <option value="BUY">BUY</option>
+                        <option value="SELL">SELL</option>
+                    </select>
+                </div>
+                <div id="sellDateContainer" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sell date</label>
+                    <input type="date" id="sellDate" class="pp-input w-full">
+                </div>
+                <div id="sellPriceContainer" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sell price</label>
+                    <input type="number" id="sellPrice" class="pp-input w-full" step="0.01" min="0">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="cancelTradeBtn" class="pp-btn pp-btn-secondary">Cancel</button>
+                <button type="button" id="saveTradeBtn" class="pp-btn pp-btn-primary">Save trade</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+
+    <script src="trading-journal.min.js" defer></script>
+</body>
+</html>

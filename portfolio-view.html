@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio View - PortfolioPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="portfolio-ui.min.css">
+    <script src="portfolio-utils.min.js"></script>
+    <script src="portfolio-sectors.min.js"></script>
+    <script src="portfolio-db.min.js"></script>
+    <script src="portfolio-ui.min.js"></script>
+    <script src="portfolio-view.min.js" defer></script>
+</head>
+<body class="pp-app">
+    <a href="#mainContent" class="pp-skip-link">Skip to main content</a>
+    <header id="ppAppShell" class="pp-no-print"></header>
+
+    <div class="pp-container" id="mainContent">
+        <header id="ppPageHero" class="pp-no-print mb-6"></header>
+
+        <div id="portfolioViewContent" class="hidden">
+            <div id="portfolioStats" class="pp-stat-rows mb-6"></div>
+
+            <div id="tradingActivity" class="hidden"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 pp-no-print">
+                <div class="pp-card">
+                    <h2 class="pp-card-title text-base mb-4">Allocation (top 10)</h2>
+                    <div class="h-72 relative">
+                        <canvas id="allocationChart"></canvas>
+                    </div>
+                </div>
+                <div class="pp-card">
+                    <h2 class="pp-card-title text-base mb-4">Performance by security</h2>
+                    <div class="h-72 relative">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+                <div class="pp-card">
+                    <h2 class="pp-card-title text-base mb-4">Sector market value</h2>
+                    <div class="h-72 relative">
+                        <canvas id="sectorChart"></canvas>
+                    </div>
+                </div>
+                <div class="pp-card">
+                    <h2 class="pp-card-title text-base mb-4">Performance by sector</h2>
+                    <div class="h-72 relative">
+                        <canvas id="sectorPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pp-card">
+                <div class="pp-card-header mb-4">
+                    <h2 class="pp-card-title">Holdings</h2>
+                </div>
+                <div class="mb-4 flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 pp-no-print">
+                    <input type="search" id="holdingsSearch" class="pp-input max-w-xs" placeholder="Search symbol or sector…" autocomplete="off">
+                    <label class="text-sm font-medium text-slate-700" for="holdingsSectorFilter">Sector</label>
+                    <select id="holdingsSectorFilter" class="pp-select max-w-[160px] py-1 text-sm">
+                        <option value="">All sectors</option>
+                    </select>
+                    <label class="text-sm font-medium text-slate-700" for="holdingsSort">Sort</label>
+                    <select id="holdingsSort" class="pp-select max-w-[220px] py-1 text-sm">
+                        <option value="value-desc" selected>Highest value</option>
+                        <option value="value-asc">Lowest value</option>
+                        <option value="pnl-desc">Highest P&amp;L</option>
+                        <option value="pnl-asc">Lowest P&amp;L</option>
+                        <option value="return-desc">Highest return %</option>
+                        <option value="return-asc">Lowest return %</option>
+                        <option value="weight-desc">Highest weight</option>
+                        <option value="symbol-asc">Symbol A–Z</option>
+                        <option value="sector-asc">Sector A–Z</option>
+                        <option value="qty-desc">Highest quantity</option>
+                    </select>
+                    <span id="holdingsFilterStatus" class="text-xs text-slate-500 ml-auto"></span>
+                </div>
+                <div class="pp-table-wrap overflow-x-auto">
+                    <table id="holdingsTable" class="pp-data-table w-full">
+                        <thead>
+                            <tr>
+                                <th class="pp-th w-12 text-center">#</th>
+                                <th class="pp-th pp-th-left pp-sortable" data-sort="symbol">Symbol</th>
+                                <th class="pp-th pp-th-right pp-sortable" data-sort="qty">Qty</th>
+                                <th class="pp-th pp-th-right pp-sortable pp-sort-desc" data-sort="value">Market value</th>
+                                <th class="pp-th pp-th-right pp-sortable" data-sort="pnl">Unrealized P&amp;L</th>
+                                <th class="pp-th pp-th-left pp-sortable" data-sort="sector">Sector</th>
+                                <th class="pp-th pp-th-right pp-sortable" data-sort="weight">Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdingsTableBody"></tbody>
+                        <tfoot id="holdingsTableFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="ppAppFooter"></footer>
+</body>
+</html>
